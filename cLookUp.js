@@ -104,7 +104,7 @@ var initializeSuperParent=function(data){
 				success: function(data){						
 						myTotal=data.d.results.length
 						for(var i=0;i<myTotal;i++){
-							$(mySelectR[0]).append("<option value="+data.d.results[i].Name+">"+data.d.results[i].Name+"</option>")
+							$(mySelectR[0]).append("<option value='"+data.d.results[i].Name+"'>"+data.d.results[i].Name+"</option>")
 						}
 						
 				},
