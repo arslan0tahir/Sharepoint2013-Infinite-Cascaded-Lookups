@@ -83,7 +83,7 @@ var initializeSuperParent=function(data){
 					var myLen=relation.length
 					
 					for (var i=0;i<myLen;i++){
-						$(mySelectR[i]).prepend("<option value="+data.d.results[0][relation[i]]+" selected='selected'>"+data.d.results[0][relation[i]]+"</option>")
+						$(mySelectR[i]).prepend("<option value='"+data.d.results[0][relation[i]]+"' selected='selected'>"+data.d.results[0][relation[i]]+"</option>")
 					
 					}	
 						
@@ -140,7 +140,7 @@ var populateChild=function(myThis){
 					
 					//populating option tags for child
 					for(var i=0;i<myTotal;i++){
-						$(mySelectR[myChildIndex]).append("<option value="+data.d.results[i].Name+">"+data.d.results[i].Name+"</option>")
+						$(mySelectR[myChildIndex]).append("<option value='"+data.d.results[i].Name+"'>"+data.d.results[i].Name+"</option>")
 					}
 					//reinitializing grand children with default values
 					for(var i=myChildIndex+1;i<relation.length;i++){
