@@ -4,7 +4,15 @@ var mySelect    //All select fields available in form
 var mySelectR=[]	//All select field with relationships
 var mySelectDefault=[] //Default Html of "Select Fields" 
 var cList=_spPageContextInfo.serverRequestPath.split(_spPageContextInfo.webServerRelativeUrl+"/Lists/")[1].split("/")[0]
-$(document).ready(function(){
+var loadingChild=0;
+var cId;
+var firstTime=[];
+
+
+
+
+
+$(window).load(function(){
 	//alert("hello");
 	
 	
@@ -70,7 +78,8 @@ var initializeSuperParent=function(data){
 	
 	var holdSelect
 	var myTotal
-	var cId=SP.ScriptHelpers.getDocumentQueryPairs()["ID"]
+	cId=SP.ScriptHelpers.getDocumentQueryPairs()["ID"]
+	var savedData=[]  //if edit form is loaded, this variable will hold corresponding lookup data
 	//var cList="Main"
 	
 	if (cId){// "Edit Form"
@@ -80,11 +89,17 @@ var initializeSuperParent=function(data){
 				method: "GET",
 				headers: {"Accept":"application/json; odata=verbose"},
 				success: function(data){
-					var myLen=relation.length
+					var myLen=relation.length 
 					
 					for (var i=0;i<myLen;i++){
 						$(mySelectR[i]).prepend("<option value='"+data.d.results[0][relation[i]]+"' selected='selected'>"+data.d.results[0][relation[i]]+"</option>")
-					
+						savedData[i]=data.d.results[0][relation[i]]
+						firstTime[i]=1;
+						populateChild($(mySelectR[i]))
+						//while(loadingChild==1){
+						//	for (xx=0;xx<1000;xx++){
+						//	}
+						//}
 					}	
 						
 				},
@@ -93,7 +108,7 @@ var initializeSuperParent=function(data){
 				}
 		});
 		
-	
+		
 	}
 	// "New Form"
 		$.ajax({
@@ -119,8 +134,9 @@ var initializeSuperParent=function(data){
 
 
 var populateChild=function(myThis){
-    var myParent=myThis.title	//Parent Category e.g. Country
-	var myParentName=myThis.value //Selected Parent e.g Pakistan
+	
+    var myParent=$(myThis).attr("title")	//Parent Category e.g. Country
+	var myParentName=$(myThis).val() //Selected Parent e.g Pakistan
 	var myChildIndex=relation.indexOf(myParent)+1//get index
 	var myChild=""
 	var myTotal	
@@ -134,23 +150,36 @@ var populateChild=function(myThis){
 			
 			url: siteUrl+"/_api/web/lists/getbytitle('"+myChild+"')/items?$select=*,"+myParent+"/Name,"+myParent+"/Abbr&$expand="+myParent+"&$filter="+myParent+"/Name eq '"+myParentName+"'",
 			method: "GET",
+			cIndex: myChildIndex,
 			headers: {"Accept":"application/json; odata=verbose"},
 			success: function(data){						
 					myTotal=data.d.results.length
 					
 					//populating option tags for child
+
 					for(var i=0;i<myTotal;i++){
 						$(mySelectR[myChildIndex]).append("<option value='"+data.d.results[i].Name+"'>"+data.d.results[i].Name+"</option>")
-					}
-					//reinitializing grand children with default values
-					for(var i=myChildIndex+1;i<relation.length;i++){
-						$(mySelectR[i]).html(mySelectDefault[i])
+						
 					}
 					
 					
+					hold=this.cIndex
+					if(cId && firstTime[hold]==1){//evade initialization of child after initial loading of edit form 
+						firstTime[hold]=0
+					}
+					else{
+					
+							//reinitializing grand children with default values
+							for(var i=myChildIndex+1;i<relation.length;i++){
+								$(mySelectR[i]).html(mySelectDefault[i])
+							}
+							
+					
+					}
 			},
 			error: function (data){
 				alert('failure')
+				loadingChild=0;
 			}
 		});
 		
